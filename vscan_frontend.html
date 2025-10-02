@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VScan Dashboard — Prototype UI</title>
+  <style>
+    :root{
+      --bg:#0f1724; /* dark navy */
+      --card:#0b1220;
+      --muted:#9aa7bf;
+      --accent1:#6ee7b7; /* mint */
+      --accent2:#7c5cff; /* purple */
+      --glass: rgba(255,255,255,0.04);
+      --glass-2: rgba(255,255,255,0.02);
+      --radius:14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background: linear-gradient(180deg, #071028 0%, #081426 60%);
+      color:#e6eef8;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding:28px;
+    }
+    .app{
+      max-width:1200px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns: 320px 1fr 380px;
+      gap:20px;
+      align-items:start;
+    }
+    /* Sidebar */
+    .sidebar{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:18px;
+      min-height:640px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    .brand{display:flex;gap:10px;align-items:center;margin-bottom:14px}
+    .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:grid;place-items:center;font-weight:700;color:#07202a}
+    h1{font-size:16px;margin:0}
+    p.small{margin:0;color:var(--muted);font-size:12px}
+    .nav{margin-top:22px}
+    .nav a{display:flex;gap:10px;padding:10px;border-radius:10px;color:var(--muted);text-decoration:none;margin-bottom:6px}
+    .nav a.active{background:linear-gradient(90deg, rgba(124,92,255,0.12), rgba(110,231,183,0.06));color:var(--accent1)}
+    .card{background:var(--card);border-radius:12px;padding:12px;margin-bottom:12px;border:1px solid var(--glass)}
+    .muted{color:var(--muted);font-size:13px}
+    .project-list{margin-top:8px}
+    .project-item{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.green{background:#34d399}
+    .dot.yellow{background:#fbbf24}
+    .dot.red{background:#fb7185}
+    /* Main */
+    .main{
+      min-height:640px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:20px;
+      border:1px solid rgba(255,255,255,0.03);
+      box-shadow: 0 8px 30px rgba(3,8,24,0.6);
+    }
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+    .search{display:flex;gap:8px;align-items:center}
+    .search input{background:var(--glass);border:none;padding:10px 12px;border-radius:10px;color:inherit;min-width:260px}
+    .btn{background:linear-gradient(90deg,var(--accent2),var(--accent1));border:none;padding:10px 14px;border-radius:10px;color:#052023;font-weight:600;cursor:pointer}
+    .scan-wizard{display:grid;grid-template-columns:1fr 320px;gap:16px}
+    .scan-form .field{margin-bottom:10px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type=text], select{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:inherit}
+    .hint{font-size:12px;color:var(--muted)}
+    .recent-scans{margin-top:16px}
+    .scan-row{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;margin-bottom:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+    .status{padding:6px 8px;border-radius:8px;font-weight:600;font-size:12px}
+    .status.running{background:rgba(124,92,255,0.14);color:var(--accent2)}
+    .status.done{background:rgba(52,211,153,0.08);color:#34d399}
+    .status.error{background:rgba(251,113,133,0.08);color:#fb7185}
+
+    /* Right column */
+    .right{
+      min-height:640px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      padding:18px;border:1px solid rgba(255,255,255,0.03)
+    }
+    .metric{display:flex;justify-content:space-between;align-items:center;padding:12px;border-radius:10px;margin-bottom:10px;background:linear-gradient(90deg, rgba(124,92,255,0.03), rgba(110,231,183,0.02));}
+    .metric .num{font-size:20px;font-weight:700}
+
+    /* findings list */
+    .finding{display:flex;gap:12px;padding:12px;border-radius:10px;margin-bottom:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+    .sev{width:56px;text-align:center;padding:6px;border-radius:8px;font-weight:700}
+    .sev.h{background:rgba(251,113,133,0.06);color:#fb7185}
+    .sev.m{background:rgba(124,92,255,0.06);color:var(--accent2)}
+    .sev.l{background:rgba(110,231,183,0.06);color:var(--accent1)}
+
+    /* responsive */
+    @media (max-width:1000px){
+      .app{grid-template-columns:1fr;}
+      .right{order:3}
+    }
+
+    /* small UI mock image (SVG card) */
+    .mock{width:100%;height:220px;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+    .footer{margin-top:10px;color:var(--muted);font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="app" role="application">
+    <aside class="sidebar" aria-label="Left sidebar">
+      <div class="brand">
+        <div class="logo">VS</div>
+        <div>
+          <h1>VScan</h1>
+          <p class="small">Security scanning & reporting</p>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Primary">
+        <a href="#" class="active">Dashboard</a>
+        <a href="#">Scans</a>
+        <a href="#">Projects</a>
+        <a href="#">Reports</a>
+        <a href="#">Settings</a>
+      </nav>
+
+      <div class="card" style="margin-top:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="muted">Active Project</div>
+            <div style="font-weight:700">acme-payments</div>
+          </div>
+          <div style="text-align:right">
+            <div class="muted">Owner</div>
+            <div style="font-weight:700">acme_admin</div>
+          </div>
+        </div>
+        <div style="margin-top:10px" class="project-list">
+          <div class="project-item"><div class="dot green"></div><div>Production</div></div>
+          <div class="project-item"><div class="dot yellow"></div><div>Staging</div></div>
+          <div class="project-item"><div class="dot red"></div><div>Legacy</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Quick actions</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" style="flex:1">New Scan</button>
+          <button class="btn" style="flex:1;background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.03)">Upload .vscan</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Recent scans</div>
+        <div style="margin-top:8px">
+          <div class="scan-row"><div><strong>Prod - Quick</strong><div class="muted">10/02/2025 · by admin</div></div><div class="status done">Done</div></div>
+          <div class="scan-row"><div><strong>Staging - Full</strong><div class="muted">09/28/2025 · by devops</div></div><div class="status running">Running</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Help & Docs</div>
+        <div style="margin-top:8px;font-size:13px">Getting started guide · Responsible disclosure · API docs</div>
+      </div>
+    </aside>
+
+    <main class="main" role="main">
+      <div class="topbar">
+        <div class="search">
+          <input aria-label="Search" placeholder="Search projects, findings, CVEs..." />
+          <button class="btn">Search</button>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <div style="text-align:right">
+            <div class="muted">Signed in as</div>
+            <div style="font-weight:700">acme_admin</div>
+          </div>
+          <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--accent1),var(--accent2));display:grid;place-items:center;color:#07202a">AS</div>
+        </div>
+      </div>
+
+      <section class="scan-wizard" aria-label="Scan creation">
+        <div class="scan-form card">
+          <h2 style="margin-top:0">Create a scan</h2>
+          <div class="field">
+            <label for="type">Scan type</label>
+            <select id="type">
+              <option>Quick (URL/IP)</option>
+              <option>Full source (.vscan)</option>
+              <option>Schedule / Recurring</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="target">Target (URL or IP or .vscan URI)</label>
+            <input id="target" type="text" placeholder="https://example.com or 203.0.113.42 or s3://bucket/app.vscan" />
+            <div class="hint">We verify ownership & require signed .vscan for source scans.</div>
+          </div>
+
+          <div style="display:flex;gap:8px;align-items:center;margin-top:12px">
+            <button class="btn">Start Scan</button>
+            <button style="background:transparent;border:1px solid rgba(255,255,255,0.03);padding:10px;border-radius:10px;color:var(--muted)">Schedule</button>
+          </div>
+
+          <div class="recent-scans">
+            <h3 style="margin:12px 0 6px 0">Last scans</h3>
+            <div class="scan-row"><div><strong>example.com</strong><div class="muted">10/02/2025 — Quick</div></div><div class="status done">Done</div></div>
+            <div class="scan-row"><div><strong>staging.example.com</strong><div class="muted">09/30/2025 — Full</div></div><div class="status error">Error</div></div>
+          </div>
+        </div>
+
+        <aside class="card" style="height:100%">
+          <div class="muted">Scan preview</div>
+          <div style="margin-top:10px">
+            <div class="mock" aria-hidden="true">
+              <!-- SVG UI mock inside the card -->
+              <svg width="100%" height="100%" viewBox="0 0 820 320" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <linearGradient id="g1" x1="0" x2="1">
+                    <stop offset="0" stop-color="#7c5cff" stop-opacity="0.9"/>
+                    <stop offset="1" stop-color="#6ee7b7" stop-opacity="0.9"/>
+                  </linearGradient>
+                </defs>
+                <rect width="820" height="320" fill="#071126" />
+                <rect x="18" y="16" width="384" height="120" rx="8" fill="#081426" stroke="#0e1a2a"/>
+                <rect x="414" y="16" width="384" height="120" rx="8" fill="#081426" stroke="#0e1a2a"/>
+                <text x="36" y="42" fill="#9fb6d9" font-size="14" font-family="Inter, Arial">Overview</text>
+                <text x="432" y="42" fill="#9fb6d9" font-size="14" font-family="Inter, Arial">Latest findings</text>
+                <!-- cards -->
+                <g transform="translate(36,58)">
+                  <rect width="110" height="44" rx="8" fill="url(#g1)" />
+                  <text x="14" y="28" fill="#032024" font-weight="700">12 High</text>
+                </g>
+                <g transform="translate(156,58)">
+                  <rect width="110" height="44" rx="8" fill="#122033" />
+                  <text x="14" y="28" fill="#9fb6d9">38 Medium</text>
+                </g>
+                <g transform="translate(276,58)">
+                  <rect width="110" height="44" rx="8" fill="#122033" />
+                  <text x="14" y="28" fill="#9fb6d9">120 Low</text>
+                </g>
+                <!-- list on right -->
+                <g transform="translate(432,58)">
+                  <rect width="320" height="24" rx="6" fill="#071826"/>
+                  <text x="12" y="16" fill="#9fb6d9" font-size="12">SQL Injection — /login — High</text>
+                </g>
+                <g transform="translate(432,92)">
+                  <rect width="320" height="24" rx="6" fill="#071826"/>
+                  <text x="12" y="16" fill="#9fb6d9" font-size="12">Missing CSP — / — Medium</text>
+                </g>
+                <g transform="translate(432,126)">
+                  <rect width="320" height="24" rx="6" fill="#071826"/>
+                  <text x="12" y="16" fill="#9fb6d9" font-size="12">Outdated lib — package.json — Low</text>
+                </g>
+
+                <!-- bottom timeline -->
+                <rect x="18" y="154" width="780" height="142" rx="8" fill="#071226" stroke="#0e1a2a" />
+                <text x="36" y="182" fill="#9fb6d9" font-size="13">Scan timeline</text>
+                <rect x="36" y="196" width="160" height="12" rx="6" fill="#123" />
+                <rect x="200" y="196" width="120" height="12" rx="6" fill="#123" />
+                <rect x="328" y="196" width="240" height="12" rx="6" fill="#123" />
+                <circle cx="420" cy="222" r="8" fill="#7c5cff" />
+                <text x="436" y="226" fill="#9fb6d9" font-size="12">ZAP crawling</text>
+              </svg>
+            </div>
+            <div class="footer">Preview mockup — mobile & desktop responsive layout</div>
+          </div>
+        </aside>
+      </section>
+
+      <section style="margin-top:18px">
+        <h3 style="margin:0 0 8px 0">Open findings</h3>
+        <div class="finding">
+          <div class="sev h">HIGH</div>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-weight:700">SQL injection in /api/login</div>
+                <div class="muted">Reflected SQL injection discovered during dynamic scan. Evidence: suspicious query param.</div>
+              </div>
+              <div style="text-align:right">
+                <div class="muted">CVSS 8.6</div>
+                <button style="margin-top:8px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted)">View</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="finding">
+          <div class="sev m">MED</div>
+          <div style="flex:1">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div>
+                <div style="font-weight:700">Missing Content-Security-Policy</div>
+                <div class="muted">App missing a strict CSP — increases XSS risk. Recommend adding a restrictive CSP header.</div>
+              </div>
+              <div style="text-align:right">
+                <div class="muted">CVSS 5.0</div>
+                <button style="margin-top:8px;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted)">View</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <aside class="right" aria-label="Right column">
+      <div class="metric">
+        <div>
+          <div class="muted">Open critical</div>
+          <div class="num">3</div>
+        </div>
+        <div style="text-align:right">
+          <div class="muted">Last scan</div>
+          <div>10/02/2025</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">Top affected endpoints</div>
+        <ul style="margin:8px 0 0 0;padding:0;list-style:none">
+          <li style="padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.02)"><strong>/api/login</strong><div class="muted">SQLi</div></li>
+          <li style="padding:8px 0;border-bottom:1px dashed rgba(255,255,255,0.02)"><strong>/</strong><div class="muted">CSP missing</div></li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="muted">Actions</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" style="flex:1">Create report</button>
+          <button style="flex:1;background:transparent;border:1px solid rgba(255,255,255,0.03);color:var(--muted);border-radius:10px;padding:10px">Export JSON</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">AI assistant</div>
+        <div style="margin-top:8px">Triage suggestions · Suggested fixes · Confidence score</div>
+      </div>
+    </aside>
+  </div>
+</body>
+</html>
